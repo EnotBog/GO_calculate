@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 	"unicode"
@@ -22,7 +24,7 @@ func resultSymbol2(buf string) int {
 	buf_up := 0
 	var buf_res int
 	var pair_rim = map[rune]int{'X': 10, 'V': 5, 'I': 1}
-	//если следующее число число больше то минусуем из большего если равно добавляем в буфер, если меньше прибавляем в res
+	//если следующее число больше, то минусуем из большего если равно добавляем в буфер, если меньше прибавляем в res
 	//
 	for k := 0; k < len(buf); k++ {
 		if pair_rim[rune(buf[k])] != 0 {
@@ -65,29 +67,6 @@ func resultSymbol2(buf string) int {
 	return res
 }
 
-// ////// Здесь должна быть проверка на вошедшие символы и вышедшие
-//func resultSymbol(buf string) string { //// должен быть ынт
-//
-//	var q string = ""
-//	//array_s := []int{88, 86, 73, 32} // 32 пробел 88-X,86-V,73-I
-//	array_rune := []rune{'X', 'V', 'I'} // 32 пробел 88-X,86-V,73-I
-//	for j := 0; j < len(buf); j++ {
-//		for y := 0; y < len(array_rune); y++ {
-//			if rune(buf[j]) == array_rune[y] {
-//				q = q + string(buf[j])
-//			}
-//		}
-//	}
-//	if q == "" {
-//		log.Fatal("Данные ikzgf")
-//	}
-//res, err := strconv.Atoi(q)
-//if err != nil {
-//	log.Fatal(err)
-//}
-//	return q
-//}
-
 func FindOper(buf string) (bool, int) {
 	res_bool := false
 	res_index := -1
@@ -96,7 +75,7 @@ func FindOper(buf string) (bool, int) {
 	for i := range symbol_oper {
 		count += strings.Count(buf, string(symbol_oper[i]))
 		if count > 1 {
-			log.Fatal("формат математической операции не удовлетворяет заданию — два операнда и один оператор (+, -, /, *)")
+			panic("формат математической операции не удовлетворяет заданию — два операнда и один оператор (+, -, /, *)")
 		}
 	}
 
@@ -116,7 +95,7 @@ func FindOper(buf string) (bool, int) {
 
 func ReadString(buf string) (string, string, string) {
 	if len(buf) == 0 {
-		log.Fatal("Отсутствуют данные")
+		panic("Отсутствуют данные")
 	}
 	var a, b, c string
 
@@ -125,7 +104,7 @@ func ReadString(buf string) (string, string, string) {
 		a = buf[0:index]
 		c = buf[index+1:]
 	} else {
-		log.Fatal("Нет знака баран")
+		panic("Нет знака действия")
 	}
 	return a, b, c
 }
@@ -148,8 +127,11 @@ func FuncOperation(buf string) (int, bool) {
 		if c_buf == -1 {
 			log.Fatal("Число ", c, " неправильное")
 		}
+		if c_buf > 10 || a_buf > 10 {
+			panic("Одно из введенных чисел число больше 10")
+		}
 	} else {
-		log.Fatal("Действие с арабским и римским числом невозможно  ")
+		panic("Действие с арабским и римским числом невозможно  ")
 	}
 	switch b {
 	case "+":
@@ -160,7 +142,7 @@ func FuncOperation(buf string) (int, bool) {
 		return a_buf * c_buf, arab_number
 	case "/":
 		if c_buf == 0 {
-			log.Fatal("Делитель 0")
+			panic("Делитель 0")
 		}
 		return a_buf / c_buf, arab_number
 	}
@@ -170,6 +152,9 @@ func Result(buf string) string {
 	if res, arab_number := FuncOperation(buf); arab_number {
 		return strconv.Itoa(res)
 	} else {
+		if res <= 0 {
+			panic("Результат меньше 0")
+		}
 		return ConvertR(res)
 	}
 }
@@ -217,9 +202,9 @@ func ConvertR(res int) string {
 }
 
 func main() {
-	var in_string string
+	reader := bufio.NewReader(os.Stdin)
 	fmt.Println("Введите пример")
-	fmt.Scanf("%s", &in_string)
+	in_string, _ := reader.ReadString('\n')
 
 	fmt.Println(Result(in_string))
 
